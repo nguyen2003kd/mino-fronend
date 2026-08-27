@@ -226,7 +226,7 @@
 .hero-h2o { --r: 0deg; z-index: 3; bottom: -4.5rem; left: 0; width: 64%; max-width: 570px; animation: bottle-float 6.8s ease-in-out infinite .3s; }
 .hero-bpc { --r: 0deg; z-index: 4; right: 2%; bottom: 4%; width: 31%; max-width: 290px; animation: bottle-float 5.8s ease-in-out infinite 1.1s; }
 .guarantee-bottle { --r: 15deg; top: 8%; bottom: auto; left: 4%; width: 37%; height: auto; aspect-ratio: 2 / 3; animation: bottle-float 6s ease-in-out infinite; }
-.guarantee-visual { overflow: hidden; background: #f0edff; }
+.guarantee-visual { overflow: hidden; background: linear-gradient(rgba(232,229,255,.75) 0%, rgba(248,234,237,.75) 100%); }
 .subscription-card { animation: soft-float 5s ease-in-out infinite; }
 .bulk-float-a,.bulk-float-b,.bulk-float-c,.bulk-float-d,.bulk-float-e { width: 5rem; opacity: .78; animation: bottle-float 6s ease-in-out infinite; }
 .bulk-float-a { --r:-16deg; top:7%;left:17%; }.bulk-float-b { --r:13deg;top:12%;right:18%;animation-delay:1s }.bulk-float-c { --r:-7deg;bottom:4%;left:8%;animation-delay:.5s }.bulk-float-d { --r:9deg;bottom:9%;right:10%;animation-delay:1.3s }.bulk-float-e { --r:-12deg;top:48%;left:4%;animation-delay:2s }
@@ -234,6 +234,11 @@
 .bundle-ticket { animation: soft-float 5.5s ease-in-out infinite; }
 .credit-note { background-image: linear-gradient(135deg,transparent 0 48%,rgba(24,80,59,.08) 48% 49%,transparent 49% 100%),linear-gradient(45deg,transparent 0 48%,rgba(24,80,59,.06) 48% 49%,transparent 49% 100%); background-size: 26px 26px; }
 .quality-bottle { --r: 8deg; top: 4%; left: 25%; width: 45%; animation: bottle-float 5.7s ease-in-out infinite; }
+
+/* Source-matched soft color fields: the original uses translucent gradients, not flat panels. */
+#section-1 { background: linear-gradient(180deg, rgba(233,252,230,.7) 0%, rgba(203,229,252,.55) 100%); }
+#section-2 { background: linear-gradient(160deg, rgba(254,254,202,.55) 0%, rgba(233,252,230,.65) 35%, rgba(203,229,252,.55) 70%, rgba(232,229,255,.6) 100%); }
+@media (min-width: 1024px) { #section-1 { background: linear-gradient(90deg, #fff 0 50%, rgba(233,252,230,.7) 50%, rgba(203,229,252,.55) 100%); } }
 @media (max-width: 767px) { .hero-h2o { bottom:-3rem; left:-4%; width:70%; }.hero-spray{ right:17%;width:26%; }.guarantee-bottle{width:55%;left:24%;}.bulk-float-a,.bulk-float-b,.bulk-float-c,.bulk-float-d,.bulk-float-e{width:3.5rem;} }
 
 @media (min-width: 1024px) {
