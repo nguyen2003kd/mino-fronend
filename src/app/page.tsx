@@ -4,7 +4,7 @@ import { ArrowRightIcon, BagIcon, CheckCircleIcon, UserCircleIcon } from "@phosp
 
 import { BulkRain } from "@/components/storefront/bulk-rain";
 import { FaqList, QualityTabs } from "@/components/storefront/home-interactions";
-import { StorefrontPreviewReady } from "@/components/storefront/preview-ready";
+import { StorefrontPreviewReady } from "@/app/components/preview-ready";
 import { StorefrontTheme } from "@/components/storefront/storefront-theme";
 import { homepageMedia, storefrontTheme } from "@/config/storefront";
 

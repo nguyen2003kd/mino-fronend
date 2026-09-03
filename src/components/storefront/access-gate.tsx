@@ -4,10 +4,97 @@ import { ArrowRightIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 
 export function AccessGate() {
-  const [confirmed, setConfirmed] = useState(false); const [newsletter, setNewsletter] = useState(false); const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [confirmed, setConfirmed] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const pendingTimer = useRef<number | null>(null);
-  useEffect(() => () => { if (pendingTimer.current) window.clearTimeout(pendingTimer.current); }, []);
-  function submit() { if (!confirmed) { setStatus("error"); return; } setStatus("loading"); pendingTimer.current = window.setTimeout(() => { setStatus("success"); document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" }); }, 500); }
-  if (status === "success") return <div className="access-card animate-rise mt-7 text-left"><CheckCircleIcon className="text-[var(--shop-accent)]" size={34} weight="fill" /><h2 className="mt-4 text-2xl font-black tracking-[-.05em]">Danh mục đã sẵn sàng.</h2><p className="mt-2 text-sm leading-6 text-[var(--shop-muted)]">Bạn có thể bắt đầu từ bộ sưu tập phía dưới.</p><a href="#catalog" className="button-ink mt-6">Xem danh mục <ArrowRightIcon size={16} weight="bold" /></a></div>;
-  return <div className="access-card animate-rise mt-7 text-left [animation-delay:160ms]"><p className="eyebrow">Member access</p><h2 className="mt-3 text-2xl font-black tracking-[-.05em]">Bạn đang mua sắm cho chính mình?</h2><p className="mt-2 text-sm leading-6 text-[var(--shop-muted)]">Xác nhận nhanh để mở danh mục và những lựa chọn theo routine.</p><div className="mt-6 grid gap-3"><label className="check-row"><input checked={confirmed} onChange={(event) => { setConfirmed(event.target.checked); setStatus("idle"); }} type="checkbox" /><span>Tôi đã sẵn sàng khám phá danh mục MINO.</span></label><label className="check-row"><input checked={newsletter} onChange={(event) => setNewsletter(event.target.checked)} type="checkbox" /><span>Gửi tôi ghi chú và cập nhật sản phẩm mới.</span></label></div>{status === "error" && <p className="mt-3 text-xs font-semibold text-[#a43d3d]" role="alert">Hãy xác nhận lựa chọn đầu tiên để tiếp tục.</p>}<button onClick={submit} disabled={status === "loading"} className="button-ink mt-6 w-full disabled:cursor-wait disabled:opacity-60">{status === "loading" ? "Đang mở danh mục..." : "Vào MINO"}<ArrowRightIcon size={17} weight="bold" /></button><p className="mt-4 text-center text-[10px] leading-4 text-[var(--shop-muted)]">Bản demo: thao tác này chỉ mở phần nội dung trên trang, chưa lưu dữ liệu.</p></div>;
+  useEffect(
+    () => () => {
+      if (pendingTimer.current) window.clearTimeout(pendingTimer.current);
+    },
+    [],
+  );
+  function submit() {
+    if (!confirmed) {
+      setStatus("error");
+      return;
+    }
+    setStatus("loading");
+    pendingTimer.current = window.setTimeout(() => {
+      setStatus("success");
+      document
+        .getElementById("catalog")
+        ?.scrollIntoView({ behavior: "smooth" });
+    }, 500);
+  }
+  if (status === "success")
+    return (
+      <div className="access-card animate-rise mt-7 text-left">
+        <CheckCircleIcon
+          className="text-[var(--shop-accent)]"
+          size={34}
+          weight="fill"
+        />
+        <h2 className="mt-4 text-2xl font-black tracking-[-.05em]">
+          Danh mục đã sẵn sàng.
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-[var(--shop-muted)]">
+          Bạn có thể bắt đầu từ bộ sưu tập phía dưới.
+        </p>
+        <a href="#catalog" className="button-ink mt-6">
+          Xem danh mục <ArrowRightIcon size={16} weight="bold" />
+        </a>
+      </div>
+    );
+  return (
+    <div className="access-card animate-rise mt-7 text-left [animation-delay:160ms]">
+      <p className="eyebrow">Member access</p>
+      <h2 className="mt-3 text-2xl font-black tracking-[-.05em]">
+        Bạn đang mua sắm cho chính mình?
+      </h2>
+      <p className="mt-2 text-sm leading-6 text-[var(--shop-muted)]">
+        Xác nhận nhanh để mở danh mục và những lựa chọn theo routine.
+      </p>
+      <div className="mt-6 grid gap-3">
+        <label className="check-row">
+          <input
+            checked={confirmed}
+            onChange={(event) => {
+              setConfirmed(event.target.checked);
+              setStatus("idle");
+            }}
+            type="checkbox"
+          />
+          <span>Tôi đã sẵn sàng khám phá danh mục MINO.</span>
+        </label>
+        <label className="check-row">
+          <input
+            checked={newsletter}
+            onChange={(event) => setNewsletter(event.target.checked)}
+            type="checkbox"
+          />
+          <span>Gửi tôi ghi chú và cập nhật sản phẩm mới.</span>
+        </label>
+      </div>
+      {status === "error" && (
+        <p className="mt-3 text-xs font-semibold text-[#a43d3d]" role="alert">
+          Hãy xác nhận lựa chọn đầu tiên để tiếp tục.
+        </p>
+      )}
+      <button
+        onClick={submit}
+        disabled={status === "loading"}
+        className="button-ink mt-6 w-full disabled:cursor-wait disabled:opacity-60"
+      >
+        {status === "loading" ? "Đang mở danh mục..." : "Vào MINO"}
+        <ArrowRightIcon size={17} weight="bold" />
+      </button>
+      <p className="mt-4 text-center text-[10px] leading-4 text-[var(--shop-muted)]">
+        Bản demo: thao tác này chỉ mở phần nội dung trên trang, chưa lưu dữ
+        liệu.
+      </p>
+    </div>
+  );
 }

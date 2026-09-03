@@ -24,7 +24,10 @@ const drops = [
 
 export function BulkRain() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+    >
       {drops.map(([src, left, delay, duration, rotation, width], index) => (
         <Image
           key={`${src}-${index}`}
