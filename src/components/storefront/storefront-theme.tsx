@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import type { StorefrontThemeConfig } from "@/config/storefront";
+import type { StorefrontThemeConfig } from "@/configs/storefront";
 
 export function StorefrontTheme({
   children,

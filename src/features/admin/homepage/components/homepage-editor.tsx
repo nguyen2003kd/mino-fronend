@@ -3,8 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { toast } from "sonner";
 import {
   ArrowCounterClockwiseIcon,
+  ArrowLeftIcon,
   ArrowSquareOutIcon,
   CaretDownIcon,
   CheckCircleIcon,
@@ -15,187 +17,106 @@ import {
   ImageIcon,
   PencilSimpleIcon,
 } from "@phosphor-icons/react";
+import {
+  loadHomepageEditorDraft,
+  saveHomepageEditorDraft,
+} from "@/features/admin/homepage/services/homepage-editor.service";
+import {
+  initialHomepageDraft,
+  type BackgroundMode,
+  type EditorSectionId,
+  type GradientDirection,
+  type HomepageDraft,
+  type Viewport,
+} from "@/features/admin/homepage/homepage-editor.constants";
+import { extractErrorMessage } from "@/utils/error";
 
 const productImages = [
   { label: "Amino H2O", value: "/AminoH2ODesktop.png" },
   { label: "TB-500", value: "/amino/TB500Desktop.webp" },
+  { label: "NAD+", value: "/amino/NADDesktop.webp" },
   { label: "NAD+ Nasal Spray", value: "/amino/NAD-Spray.png" },
   { label: "BPC-157", value: "/BPC157Desktop.webp" },
 ];
 
-type GradientDirection = "to right" | "to bottom";
-type BackgroundMode = "solid" | "gradient";
-
-const initialDraft = {
-  heroTitle: "Research Peptides\nYou Can Trust",
-  heroDescription: "Research-grade peptides with Certificate of Analysis on every batch. 99%+ identity purity, third-party tested.",
-  heroCta: "Browse Catalog",
-  heroImage: "/AminoH2ODesktop.png",
-  heroBackground: "#eff0ff",
-  heroBackgroundEnd: "#cbe5fc",
-  heroGradientDirection: "to bottom" as GradientDirection,
-  heroBackgroundMode: "gradient" as BackgroundMode,
-  saleBackground: "#6b0e36",
-  saleBackgroundEnd: "#9b3927",
-  saleGradientDirection: "to right" as GradientDirection,
-  saleBackgroundMode: "gradient" as BackgroundMode,
-  guaranteeTitle: "The Amino Club Guarantee",
-  guaranteeDescription: "Documented quality for research and laboratory use. Every batch meets our internal purity standards.",
-  guaranteeImage: "/amino/NADDesktop.webp",
-  guaranteeBackground: "#f0edff",
-  guaranteeBackgroundEnd: "#f8eaed",
-  guaranteeGradientDirection: "to bottom" as GradientDirection,
-  guaranteeBackgroundMode: "gradient" as BackgroundMode,
-  guaranteePresentation: "contained" as "contained" | "directional-crop",
-  guaranteeCardOneTitle: "99% Purity Guaranteed",
-  guaranteeCardOneDetail: "Every batch verified",
-  guaranteeCardOneColor: "#dcf9d9",
-  guaranteeCardTwoTitle: "Shipment Protection",
-  guaranteeCardTwoDetail: "Every order fully covered",
-  guaranteeCardTwoColor: "#d8eaff",
-  guaranteeCardThreeTitle: "CoA with Every Batch",
-  guaranteeCardThreeDetail: "Third-party test record",
-  guaranteeCardThreeColor: "#fff6c9",
-  subscriptionTitle: "Pick any 4. Save 40% every month.",
-  subscriptionDescription: "Build a repeating box from the catalog, with predictable monthly savings and room to swap items before the next order.",
-  subscriptionCta: "Build your box",
-  subscriptionBoxTitle: "Your box",
-  subscriptionBoxBadge: "4 items + 1 free",
-  subscriptionBoxImageOne: "/amino/TB500Desktop.webp",
-  subscriptionBoxImageTwo: "/BPC157Desktop.webp",
-  subscriptionBoxImageThree: "/AminoH2ODesktop.png",
-  subscriptionBoxImageFour: "/amino/NAD-Spray.png",
-  subscriptionBenefitOne: "Free H2O in every box",
-  subscriptionBenefitTwo: "Free two-day delivery",
-  subscriptionBenefitThree: "Swap items after the first delivery",
-  subscriptionBenefitFour: "Batch documentation included",
-  subscriptionBackground: "#f8fff0",
-  subscriptionBackgroundEnd: "#cbe5fc",
-  subscriptionGradientDirection: "to right" as GradientDirection,
-  subscriptionBackgroundMode: "gradient" as BackgroundMode,
-  bulkTitle: "Stocking up? Up to 50% off in bulk.",
-  bulkDescription: "Ten units unlock deeper pricing; larger research orders receive the strongest price tier.",
-  bulkCta: "Order in bulk",
-  bulkProductTitle: "GLP-3 (RT)",
-  bulkProductDetail: "10 units · 40% applied",
-  bulkProductPrice: "$419.94",
-  bulkProductImage: "/amino/TB500Desktop.webp",
-  bulkRainImageOne: "/amino/TB500Desktop.webp",
-  bulkRainImageTwo: "/BPC157Desktop.webp",
-  bulkRainImageThree: "/AminoH2ODesktop.png",
-  bulkRainImageFour: "/amino/NAD-Spray.png",
-  bulkBackground: "#e6f6ef",
-  bulkBackgroundEnd: "#e8e5ff",
-  bulkGradientDirection: "to bottom" as GradientDirection,
-  bulkBackgroundMode: "gradient" as BackgroundMode,
-  clubTitle: "Run a tab.",
-  clubDescription: "Split an eligible order into four scheduled payments. The order dispatches now; there are no interest charges shown at checkout.",
-  clubCta: "Become a member",
-  clubBackground: "#191611",
-  clubBackgroundEnd: "#40342a",
-  clubGradientDirection: "to right" as GradientDirection,
-  clubBackgroundMode: "gradient" as BackgroundMode,
-  bundlesTitle: "Good research travels by link.",
-  bundlesDescription: "Load several products onto one ticket and share it with the people placing an order alongside you.",
-  bundlesCta: "Build a bundle",
-  bundlesCardLabel: "Research bundle",
-  bundlesCardTitle: "Shared with you",
-  bundlesItemOne: "GLP-3 (RT)",
-  bundlesItemOneQuantity: "×1",
-  bundlesItemTwo: "GLP-2 (TR)",
-  bundlesItemTwoQuantity: "×2",
-  bundlesItemThree: "GLP-1 (SM)",
-  bundlesItemThreeQuantity: "×3",
-  bundlesShippingLabel: "2-DAY SHIPPING",
-  bundlesShippingValue: "FREE",
-  bundlesPointsTitle: "+10% back",
-  bundlesPointsDetail: "in points, every order",
-  bundlesBackground: "#edf9ff",
-  bundlesBackgroundEnd: "#e9e7ff",
-  bundlesGradientDirection: "to right" as GradientDirection,
-  bundlesBackgroundMode: "gradient" as BackgroundMode,
-  creditTitle: "Load points once. We add up to 25% on top.",
-  creditBackground: "#f8f4ea",
-  creditBackgroundEnd: "#e7f4e9",
-  creditGradientDirection: "to right" as GradientDirection,
-  creditBackgroundMode: "gradient" as BackgroundMode,
-  successTitle: "Everything you need to succeed",
-  successBackground: "#e6ffe0",
-  successBackgroundEnd: "#dcefff",
-  successGradientDirection: "to right" as GradientDirection,
-  successBackgroundMode: "gradient" as BackgroundMode,
-  qualityTitle: "Quality you can verify, not just trust",
-  qualityDescription: "Each batch is reviewed against a repeatable quality process before release.",
-  qualityMetricOneValue: "99%+",
-  qualityMetricOneLabel: "Purity",
-  qualityMetricTwoValue: "5",
-  qualityMetricTwoLabel: "Quality checks",
-  qualityMetricThreeValue: "100%",
-  qualityMetricThreeLabel: "U.S. verified",
-  qualityProofTitle: "See the Proof",
-  qualityProofDescription: "View our quality procedures",
-  successCards: [
-    { title: "Join a community of researchers", description: "Connect with fellow researchers, share lab notes, and reference documentation for each compound." },
-    { title: "Research-grade quality meets researcher-friendly pricing", description: "Documented procedures and research-grade pricing designed to keep information accessible." },
-    { title: "Expert support whenever you need it", description: "A clear support path for order, product, and documentation questions." },
-    { title: "Extensive research library at your fingertips", description: "Reference articles and educational resources, updated regularly." },
-    { title: "Free shipment protection on every order", description: "Every order is covered against damage, loss, or theft while it is in transit." },
-  ] as { title: string; description: string }[],
-  whyTitle: "Why choose Amino Club?",
-  whyCards: [
-    { title: "Always in Stock", description: "Clear policies and documentation, designed around practical research orders." },
-    { title: "Volume Pricing", description: "Clear policies and documentation, designed around practical research orders." },
-    { title: "Safe & Protected Shipping", description: "Clear policies and documentation, designed around practical research orders." },
-    { title: "Researcher Community", description: "Clear policies and documentation, designed around practical research orders." },
-    { title: "99%+ Purity Guaranteed", description: "Clear policies and documentation, designed around practical research orders." },
-    { title: "Shipment Protection", description: "Clear policies and documentation, designed around practical research orders." },
-  ] as { title: string; description: string }[],
-  faqTitle: "Frequently Asked Questions",
-  faqDescription: "Everything you need to know about peptide research",
-  faqItems: ["What purity level are your peptides and how is it verified?", "What is a Certificate of Analysis and how do I read it?", "What is Amino H2O?", "How should I store the lyophilized product?", "How long is the lyophilized product stable?", "How fast do you ship and is cold shipping required?", "What is your return and refund policy?"] as string[],
-  footerCta: "All the research peptides you need, with the peace of mind and research community at your fingertips.",
-  footerShopCta: "Shop Now",
-  footerDescription: "Premium research-grade peptides for controlled laboratory studies.",
-  footerBackground: "#091c34",
-  footerBackgroundEnd: "#173c31",
-  footerGradientDirection: "to right" as GradientDirection,
-  footerBackgroundMode: "gradient" as BackgroundMode,
-};
-
-type Draft = typeof initialDraft;
-type Viewport = "desktop" | "mobile";
-type EditorSectionId = "hero" | "guarantee" | "brand" | "subscription" | "bulk" | "club" | "bundles" | "success" | "quality" | "why" | "faq" | "footer";
-
 export function HomepageEditor() {
-  const [draft, setDraft] = useState<Draft>(initialDraft);
+  const [draft, setDraft] = useState<HomepageDraft>(initialHomepageDraft);
   const [viewport, setViewport] = useState<Viewport>("desktop");
   const [activeSection, setActiveSection] = useState<EditorSectionId | null>(null);
-  const [notice, setNotice] = useState("Bạn đang chỉnh bản nháp. Chưa có dữ liệu nào được publish.");
+  const [notice, setNotice] = useState("Đang tải bản nháp từ máy chủ...");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  function update<K extends keyof Draft>(key: K, value: Draft[K]) {
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadDraft = async () => {
+      try {
+        const storedDraft = await loadHomepageEditorDraft();
+        if (!isMounted) return;
+
+        if (storedDraft) {
+          setDraft({ ...initialHomepageDraft, ...storedDraft } as HomepageDraft);
+          setNotice("Đã tải bản nháp homepage từ máy chủ.");
+        } else {
+          setNotice("Chưa có bản nháp trên máy chủ. Bạn có thể bắt đầu chỉnh sửa.");
+        }
+      } catch (error) {
+        if (!isMounted) return;
+
+        const message = extractErrorMessage(error);
+        setNotice(`Không thể tải bản nháp: ${message}`);
+        toast.error("Không thể tải homepage", { description: message });
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadDraft();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  function update<K extends keyof HomepageDraft>(key: K, value: HomepageDraft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
-    setNotice("Preview đã cập nhật · nhấn Lưu bản nháp để giữ dữ liệu mock");
+    setNotice("Preview đã cập nhật · nhấn Lưu & xuất bản để đồng bộ lên trang chủ.");
   }
 
   function updateContentCard(group: "successCards" | "whyCards", index: number, field: "title" | "description", value: string) {
     setDraft((current) => ({ ...current, [group]: current[group].map((card, cardIndex) => cardIndex === index ? { ...card, [field]: value } : card) }));
-    setNotice("Preview đã cập nhật · nhấn Lưu bản nháp để giữ dữ liệu mock");
+    setNotice("Preview đã cập nhật · nhấn Lưu & xuất bản để đồng bộ lên trang chủ.");
   }
 
   function updateFaq(index: number, value: string) {
     setDraft((current) => ({ ...current, faqItems: current.faqItems.map((item, itemIndex) => itemIndex === index ? value : item) }));
-    setNotice("Preview đã cập nhật · nhấn Lưu bản nháp để giữ dữ liệu mock");
+    setNotice("Preview đã cập nhật · nhấn Lưu & xuất bản để đồng bộ lên trang chủ.");
   }
 
-  function saveDraft() {
-    window.localStorage.setItem("mino-homepage-draft", JSON.stringify(draft));
-    setNotice("Đã lưu bản nháp vào trình duyệt này. Khi có backend, hành động này sẽ gọi API publish.");
+  async function saveDraft() {
+    if (isSaving) return;
+
+    setIsSaving(true);
+
+    try {
+      await saveHomepageEditorDraft(draft);
+      setNotice("Đã lưu và xuất bản homepage.");
+      toast.success("Đã xuất bản homepage");
+    } catch (error) {
+      const message = extractErrorMessage(error);
+      setNotice(`Không thể xuất bản: ${message}`);
+      toast.error("Không thể lưu homepage", { description: message });
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function resetDraft() {
-    setDraft(initialDraft);
-    window.localStorage.removeItem("mino-homepage-draft");
-    setNotice("Đã khôi phục nội dung mẫu.");
+    setDraft(initialHomepageDraft);
+    setNotice("Đã khôi phục nội dung mẫu. Nhấn Lưu & xuất bản để cập nhật trang chủ.");
   }
 
   return (
@@ -207,9 +128,13 @@ export function HomepageEditor() {
             <div><p className="text-xs font-bold uppercase tracking-[.15em] text-black/45">Admin / Content</p><h1 className="text-lg font-semibold tracking-tight">Homepage editor</h1></div>
           </div>
           <div className="flex items-center gap-2">
+            <Link href="/admin" className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm font-bold">
+              <ArrowLeftIcon size={16} />
+              <span className="hidden sm:inline">Thoát</span>
+            </Link>
             <Link href="/" target="_blank" className="hidden items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm font-bold sm:inline-flex">Mở trang chủ <ArrowSquareOutIcon size={16} /></Link>
-            <button type="button" onClick={resetDraft} className="grid h-10 w-10 place-items-center rounded-xl border border-black/10 bg-white" aria-label="Reset draft"><ArrowCounterClockwiseIcon size={18} /></button>
-            <button type="button" onClick={saveDraft} className="inline-flex items-center gap-2 rounded-xl bg-[#173c31] px-4 py-2.5 text-sm font-bold text-white"><FloppyDiskIcon size={17} weight="bold" />Lưu bản nháp</button>
+            <button type="button" onClick={resetDraft} disabled={isSaving} className="grid h-10 w-10 place-items-center rounded-xl border border-black/10 bg-white disabled:cursor-not-allowed disabled:opacity-50" aria-label="Reset draft"><ArrowCounterClockwiseIcon size={18} /></button>
+            <button type="button" onClick={saveDraft} disabled={isLoading || isSaving} className="inline-flex items-center gap-2 rounded-xl bg-[#173c31] px-4 py-2.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"><FloppyDiskIcon size={17} weight="bold" />{isSaving ? "Đang lưu..." : "Lưu & xuất bản"}</button>
           </div>
         </div>
       </header>
@@ -230,7 +155,7 @@ export function HomepageEditor() {
             <Field label="Mô tả"><textarea value={draft.guaranteeDescription} onChange={(event) => update("guaranteeDescription", event.target.value)} rows={3} /></Field>
             <SelectImage label="Ảnh Guarantee" value={draft.guaranteeImage} onChange={(value) => update("guaranteeImage", value)} />
             <GradientField label="Nền ảnh" mode={draft.guaranteeBackgroundMode} start={draft.guaranteeBackground} end={draft.guaranteeBackgroundEnd} direction={draft.guaranteeGradientDirection} onModeChange={(value) => update("guaranteeBackgroundMode", value)} onStartChange={(value) => update("guaranteeBackground", value)} onEndChange={(value) => update("guaranteeBackgroundEnd", value)} onDirectionChange={(value) => update("guaranteeGradientDirection", value)} />
-            <label className="grid gap-1.5 text-xs font-bold text-black/55">Cách đặt ảnh<select value={draft.guaranteePresentation} onChange={(event) => update("guaranteePresentation", event.target.value as Draft["guaranteePresentation"])}><option value="contained">Bình thường</option><option value="directional-crop">Crop lớn theo hướng</option></select></label>
+            <label className="grid gap-1.5 text-xs font-bold text-black/55">Cách đặt ảnh<select value={draft.guaranteePresentation} onChange={(event) => update("guaranteePresentation", event.target.value as HomepageDraft["guaranteePresentation"])}><option value="contained">Bình thường</option><option value="directional-crop">Crop lớn theo hướng</option></select></label>
             <GuaranteeCardFields number="01" title={draft.guaranteeCardOneTitle} detail={draft.guaranteeCardOneDetail} color={draft.guaranteeCardOneColor} onTitleChange={(value) => update("guaranteeCardOneTitle", value)} onDetailChange={(value) => update("guaranteeCardOneDetail", value)} onColorChange={(value) => update("guaranteeCardOneColor", value)} />
             <GuaranteeCardFields number="02" title={draft.guaranteeCardTwoTitle} detail={draft.guaranteeCardTwoDetail} color={draft.guaranteeCardTwoColor} onTitleChange={(value) => update("guaranteeCardTwoTitle", value)} onDetailChange={(value) => update("guaranteeCardTwoDetail", value)} onColorChange={(value) => update("guaranteeCardTwoColor", value)} />
             <GuaranteeCardFields number="03" title={draft.guaranteeCardThreeTitle} detail={draft.guaranteeCardThreeDetail} color={draft.guaranteeCardThreeColor} onTitleChange={(value) => update("guaranteeCardThreeTitle", value)} onDetailChange={(value) => update("guaranteeCardThreeDetail", value)} onColorChange={(value) => update("guaranteeCardThreeColor", value)} />
@@ -346,7 +271,7 @@ export function HomepageEditor() {
   );
 }
 
-function HomepageFramePreview({ draft, viewport, onSectionSelect }: { draft: Draft; viewport: Viewport; onSectionSelect: (section: EditorSectionId) => void }) {
+function HomepageFramePreview({ draft, viewport, onSectionSelect }: { draft: HomepageDraft; viewport: Viewport; onSectionSelect: (section: EditorSectionId) => void }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [availableWidth, setAvailableWidth] = useState(0);
@@ -575,7 +500,7 @@ function HomepageFramePreview({ draft, viewport, onSectionSelect }: { draft: Dra
   return <div ref={previewRef} className={"relative mx-auto overflow-hidden bg-white shadow-[0_24px_60px_rgba(18,38,34,.18)] transition-all " + (viewport === "desktop" ? "w-full max-w-[1240px]" : "w-[390px] max-w-full")} style={{ height: canvasHeight * scale }}><iframe ref={iframeRef} onLoad={(event) => { setPreviewReady(false); event.currentTarget.contentWindow?.scrollTo(0, 0); }} src="/" title="Homepage preview" className="absolute left-0 top-0 border-0 bg-white" style={{ width: canvasWidth, height: canvasHeight, transform: `scale(${scale})`, transformOrigin: "top left" }} /><div className="hidden"><HomepagePreview draft={draft} viewport={viewport} /></div></div>;
 }
 
-function HomepagePreview({ draft, viewport }: { draft: Draft; viewport: Viewport }) {
+function HomepagePreview({ draft, viewport }: { draft: HomepageDraft; viewport: Viewport }) {
   const isMobile = viewport === "mobile";
   const title = draft.heroTitle.split("\n").map((line) => <span key={line} className="block">{line}</span>);
   const cropClass = draft.guaranteePresentation === "directional-crop" ? "scale-[1.75] translate-x-[12%] -translate-y-[12%]" : "scale-100";
@@ -612,7 +537,101 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function SelectImage({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return <label className="grid gap-1.5 text-xs font-bold text-black/55">{label}<span className="relative"><select value={value} onChange={(event) => onChange(event.target.value)}>{productImages.map((image) => <option key={image.value} value={image.value}>{image.label}</option>)}</select><CaretDownIcon size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" /></span></label>;
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const selectedImage = productImages.find((image) => image.value === value);
+  const selectedLabel = selectedImage?.label ?? "Ảnh đã chọn";
+
+  function selectImage(imageValue: string) {
+    onChange(imageValue);
+    setIsLibraryOpen(false);
+  }
+
+  return (
+    <section className="rounded-2xl border border-[#cfe0d8] bg-[#f8fbf9] p-2.5 shadow-[0_12px_28px_-24px_rgba(23,60,49,.45)]">
+      <div className="mb-2 flex items-center justify-between gap-3 px-1">
+        <p className="text-[10px] font-black tracking-[.12em] text-[#315a49] uppercase">{label}</p>
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#577368]">
+          <span className="size-1.5 rounded-full bg-[#27734f]" />
+          Đang chọn
+        </span>
+      </div>
+
+      <button
+        type="button"
+        aria-expanded={isLibraryOpen}
+        aria-label={`Đổi ${label}`}
+        onClick={() => setIsLibraryOpen((current) => !current)}
+        className="group flex w-full items-center gap-3 rounded-xl border border-[#d9e6df] bg-white p-2 text-left transition-all duration-300 hover:border-[#7da895] hover:shadow-[0_10px_22px_-18px_rgba(23,60,49,.6)] active:scale-[.98]"
+      >
+        <span className="relative grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg bg-[#e8f1ec]">
+          {selectedImage ? (
+            <Image
+              src={selectedImage.value}
+              alt=""
+              width={96}
+              height={96}
+              className="h-full w-full object-contain p-1.5 transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <ImageIcon size={24} className="text-[#628173]" />
+          )}
+          <span className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-[#173c31]/25 to-transparent" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-bold tracking-tight text-[#173c31]">{selectedLabel}</span>
+          <span className="mt-0.5 block text-[11px] leading-4 text-[#668076]">Mở thư viện để thay ảnh</span>
+        </span>
+        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#eff6f2] text-[#315a49] transition-transform duration-300 group-hover:bg-[#dcece4]">
+          <CaretDownIcon size={16} weight="bold" className={isLibraryOpen ? "rotate-180 transition-transform duration-300" : "transition-transform duration-300"} />
+        </span>
+      </button>
+
+      {isLibraryOpen && (
+        <div className="mt-2.5 border-t border-[#dce9e2] pt-2.5">
+          <div className="mb-2 flex items-center justify-between gap-2 px-1">
+            <p className="text-[10px] font-bold tracking-[.1em] text-[#668076] uppercase">Thư viện ảnh</p>
+            <p className="text-[10px] text-[#80978d]">Chọn một ảnh để áp dụng</p>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {productImages.map((image) => {
+              const isSelected = image.value === value;
+
+              return (
+                <button
+                  key={image.value}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => selectImage(image.value)}
+                  className={
+                    "group relative overflow-hidden rounded-xl border bg-white p-1.5 text-left transition-all duration-300 active:scale-[.98] " +
+                    (isSelected
+                      ? "border-[#27734f] ring-2 ring-[#27734f]/15"
+                      : "border-[#dce7e1] hover:-translate-y-0.5 hover:border-[#8fb39f]")
+                  }
+                >
+                  <span className="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-lg bg-[#edf4f0]">
+                    <Image
+                      src={image.value}
+                      alt=""
+                      width={160}
+                      height={120}
+                      className="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                    />
+                    {isSelected && (
+                      <span className="absolute right-1.5 top-1.5 grid size-5 place-items-center rounded-full bg-[#27734f] text-white shadow-[0_3px_10px_rgba(23,60,49,.25)]">
+                        <CheckCircleIcon size={14} weight="fill" />
+                      </span>
+                    )}
+                  </span>
+                  <span className="block truncate px-1 pb-0.5 pt-1.5 text-[11px] font-bold text-[#315a49]">{image.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </section>
+  );
 }
 
 function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {

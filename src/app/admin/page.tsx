@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AdminDashboard } from "@/components/admin/admin-dashboard";
+import { AdminOverview } from "@/app/admin/components/admin-overview";
 
 export const metadata: Metadata = {
   title: "Admin | MINO club",
@@ -8,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPage() {
-  return <AdminDashboard />;
+  return <AdminOverview />;
 }

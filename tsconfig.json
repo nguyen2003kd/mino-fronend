@@ -19,8 +19,43 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@api/*": [
+        "./src/api/*"
+      ],
+      "@lib/*": [
+        "./src/lib/*"
+      ],
+      "@public/*": [
+        "./public/*"
+      ],
+      "@stores/*": [
+        "./src/stores/*"
+      ],
+      "@links/*": [
+        "./src/links/*"
+      ],
+      "@app/*": [
+        "./src/app/(main)/*"
+      ],
+      "@constants/*": [
+        "./src/constants/*"
+      ],
+      "@types/*": [
+        "./src/types/*"
+      ],
+      "radix-ui": [
+        "./node_modules/radix-ui"
+      ]
+    },
   },
   "include": [
     "next-env.d.ts",
@@ -30,5 +65,11 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "src/utils/attendance.ts",
+    "src/utils/generate-slug.ts",
+    "src/utils/i18n.ts"
+  ]
 }

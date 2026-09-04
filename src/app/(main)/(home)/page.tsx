@@ -4,9 +4,10 @@ import { ArrowRightIcon, BagIcon, CheckCircleIcon, UserCircleIcon } from "@phosp
 
 import { BulkRain } from "@/components/storefront/bulk-rain";
 import { FaqList, QualityTabs } from "@/components/storefront/home-interactions";
-import { StorefrontPreviewReady } from "@/app/components/preview-ready";
+import { StorefrontPreviewReady } from "./components/preview-ready";
 import { StorefrontTheme } from "@/components/storefront/storefront-theme";
-import { homepageMedia, storefrontTheme } from "@/config/storefront";
+import { homepageMedia, storefrontTheme } from "@/configs/storefront";
+import { HomepageDraftSync } from "@/features/main/homepage/components/homepage-draft-sync";
 
 const navItems = ["Products", "Build a Box", "Bulk Orders", "COAs", "Membership", "Partner Program", "Research Bundles", "Contact us"];
 
@@ -14,6 +15,7 @@ export default function Home() {
   return (
     <StorefrontTheme theme={storefrontTheme}>
       <StorefrontPreviewReady />
+      <HomepageDraftSync />
       <main className="overflow-hidden bg-white text-black">
         <Header />
         <Hero />
